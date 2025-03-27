@@ -1,4 +1,5 @@
 <?php get_header(); ?>
+<!-- 'show_in_rest' => true -->
 
 
     <div class="page-banner">

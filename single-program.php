@@ -27,14 +27,48 @@ while(have_posts()) {
         <div class="generic-content"><?php the_content(); ?></div>
 
         <?php 
-                $today = date('Ymd');
-                $events_homepage = new WP_Query([
-                    'posts_per_page' => 2,
-                    'post_type' => 'event',
-                    'meta_key' => 'event_date',
-                    'orderby' => 'meta_value_num',
-                    'order' => 'ASC',
-                    'meta_query' => [
+         $related_professors = new WP_Query([
+          'posts_per_page' => -1,
+          'post_type' => 'professor',
+          'orderby' => 'title',
+          'order' => 'ASC',
+          'meta_query' => [
+              [
+                'key' => 'related_programs',
+                'compare' => 'LIKE',
+                'value' => '"' . get_the_ID() . '"',
+              ],
+          ],
+      ]); 
+
+      if ($related_professors->have_posts()) {
+        echo '<hr class="section-break">';
+        echo '<h2 class="headline headline--medium">' .get_the_title() . ' Professors</h2>';
+        echo '<ul class="professor-cards">';
+        while($related_professors->have_posts()) {
+            $related_professors->the_post(); ?>
+            <li class="professor-card__list-item">
+              <a class="professor-card" href="<?php the_permalink(); ?>">
+                <img class="professor-card__img" src="<?php the_post_thumbnail_url('professor_landscape'); ?>">
+                <span class="professor-card__name"><?php the_title(); ?></span>
+              </a></li>
+        <?php }
+        echo '</ul>';
+      }
+
+      wp_reset_postdata(); 
+      // Resets the global post object and all data back to the default URL based query.
+      // If you run mulitple queries on one page, you need this method so the custom queries don't clash. 
+      //////////////////////////////////////////////////////////////////////////////////
+
+      $today = date('Ymd');
+      $events_homepage = new WP_Query([
+          'posts_per_page' => 2,
+          'post_type' => 'event',
+          'meta_key' => 'event_date',
+          'orderby' => 'meta_value_num',
+          'order' => 'ASC',
+          'meta_query' => [
                         [
                             'key' => 'event_date',
                             'compare' => '>=',

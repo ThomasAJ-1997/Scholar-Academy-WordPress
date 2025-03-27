@@ -13,10 +13,14 @@ add_action('wp_enqueue_scripts', 'scholar_academy_files');
 // Second argument is the name of a function we want to run: we create this function.
 
 function scholar_academy_features() {
-    register_nav_menu('headerMenuLocation', 'Header Menu Location');
-    register_nav_menu('footerLocationOne', 'Footer Location One');
-    register_nav_menu('footerLocationTwo', 'Footer Location Two');
+    // register_nav_menu('headerMenuLocation', 'Header Menu Location');
+    // register_nav_menu('footerLocationOne', 'Footer Location One');
+    // register_nav_menu('footerLocationTwo', 'Footer Location Two');
     add_theme_support('title-tag');
+    add_theme_support( 'post-thumbnails', array( 'professor' ));
+    add_image_size('professor_landscape', 400, 260, true);
+    add_image_size('professor_portrait', 480, 650, true);
+    add_image_size('page_banner', 1500, 350, true);
 };
 
 add_action('after_setup_theme', 'scholar_academy_features');
