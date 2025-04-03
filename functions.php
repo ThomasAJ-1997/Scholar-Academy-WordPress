@@ -31,6 +31,7 @@ function page_banner($args = NULL) {
 <?php }
 
 function scholar_academy_files() {
+  wp_enqueue_script('googleMap', '//maps.googleapis.com/maps/api/js?key=AIzaSyBtC8wRGKnkMkrk8LnIGegI5yNi0ddmhcE', null, '1.0', true);
     wp_enqueue_script('main-university-js', get_theme_file_uri('/build/index.js'), array('jquery'), '1.0', true);
     wp_enqueue_style('academy_main_styles', get_theme_file_uri('/build/style-index.css'));
     wp_enqueue_style('academy_extra_styles', get_theme_file_uri('/build/index.css'));
@@ -55,7 +56,12 @@ add_action('after_setup_theme', 'scholar_academy_features');
 
 // Adjust Custom Queries
 function scholar_academy_adjust_queries($query) {
-    if (!is_admin() && is_post_type_archive('program') && $query->is_main_query()) {
+  if (!is_admin() && is_post_type_archive('campus') && $query->is_main_query()) {
+    $query->set('posts_per_page', -1);
+
+} 
+  
+  if (!is_admin() && is_post_type_archive('program') && $query->is_main_query()) {
         $query->set('orderby', 'title');
         $query->set('order', 'ASC');
         $query->set('posts_per_page', -1);
@@ -83,3 +89,8 @@ function scholar_academy_adjust_queries($query) {
 
 add_action('pre_get_posts', 'scholar_academy_adjust_queries');
 
+function scholar_academy_map_key($api) {
+  $api['key'] = 'AIzaSyBtC8wRGKnkMkrk8LnIGegI5yNi0ddmhcE';
+  return $api;
+} 
+add_filter('acf/fields/google_map/api', 'scholar_academy_map_key');

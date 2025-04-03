@@ -1,5 +1,4 @@
 /******/ (() => { // webpackBootstrap
-/******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
 /***/ "./css/style.scss":
@@ -8,6 +7,7 @@
   \************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 // extracted by mini-css-extract-plugin
 
@@ -20,6 +20,7 @@ __webpack_require__.r(__webpack_exports__);
   \*******************************************************/
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ Glide)
@@ -3926,19 +3927,156 @@ var Glide = /*#__PURE__*/function (_Core) {
   \**********************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _css_style_scss__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../css/style.scss */ "./css/style.scss");
 /* harmony import */ var _modules_MobileMenu__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./modules/MobileMenu */ "./src/modules/MobileMenu.js");
+/* harmony import */ var _modules_MobileMenu__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_modules_MobileMenu__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _modules_HeroSlider__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./modules/HeroSlider */ "./src/modules/HeroSlider.js");
+/* harmony import */ var _modules_GoogleMap__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./modules/GoogleMap */ "./src/modules/GoogleMap.js");
+/* harmony import */ var _modules_GoogleMap__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_modules_GoogleMap__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _modules_Search__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./modules/Search */ "./src/modules/Search.js");
+/* harmony import */ var _modules_Search__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_modules_Search__WEBPACK_IMPORTED_MODULE_4__);
 
 
 // Our modules / classes
 
 
 
+
+
 // Instantiate a new object using our modules/classes
-var mobileMenu = new _modules_MobileMenu__WEBPACK_IMPORTED_MODULE_1__["default"]();
-var heroSlider = new _modules_HeroSlider__WEBPACK_IMPORTED_MODULE_2__["default"]();
+const mobileMenu = new (_modules_MobileMenu__WEBPACK_IMPORTED_MODULE_1___default())();
+const heroSlider = new _modules_HeroSlider__WEBPACK_IMPORTED_MODULE_2__["default"]();
+const googleMaps = new (_modules_GoogleMap__WEBPACK_IMPORTED_MODULE_3___default())();
+const searchLive = new (_modules_Search__WEBPACK_IMPORTED_MODULE_4___default())();
+
+/***/ }),
+
+/***/ "./src/modules/GoogleMap.js":
+/*!**********************************!*\
+  !*** ./src/modules/GoogleMap.js ***!
+  \**********************************/
+/***/ (() => {
+
+(function ($) {
+  /**
+   * initMap
+   *
+   * Renders a Google Map onto the selected jQuery element
+   *
+   * @date    22/10/19
+   * @since   5.8.6
+   *
+   * @param   jQuery $el The jQuery element.
+   * @return  object The map instance.
+   */
+  function initMap($el) {
+    // Find marker elements within map.
+    var $markers = $el.find(".marker");
+
+    // Create gerenic map.
+    var mapArgs = {
+      zoom: $el.data("zoom") || 16,
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
+    var map = new google.maps.Map($el[0], mapArgs);
+
+    // Add markers.
+    map.markers = [];
+    $markers.each(function () {
+      initMarker($(this), map);
+    });
+
+    // Center map based on markers.
+    centerMap(map);
+
+    // Return map instance.
+    return map;
+  }
+
+  /**
+   * initMarker
+   *
+   * Creates a marker for the given jQuery element and map.
+   *
+   * @date    22/10/19
+   * @since   5.8.6
+   *
+   * @param   jQuery $el The jQuery element.
+   * @param   object The map instance.
+   * @return  object The marker instance.
+   */
+  function initMarker($marker, map) {
+    // Get position from marker.
+    var lat = $marker.data("lat");
+    var lng = $marker.data("lng");
+    var latLng = {
+      lat: parseFloat(lat),
+      lng: parseFloat(lng)
+    };
+
+    // Create marker instance.
+    var marker = new google.maps.Marker({
+      position: latLng,
+      map: map
+    });
+
+    // Append to reference for later use.
+    map.markers.push(marker);
+
+    // If marker contains HTML, add it to an infoWindow.
+    if ($marker.html()) {
+      // Create info window.
+      var infowindow = new google.maps.InfoWindow({
+        content: $marker.html()
+      });
+
+      // Show info window when marker is clicked.
+      google.maps.event.addListener(marker, "click", function () {
+        infowindow.open(map, marker);
+      });
+    }
+  }
+
+  /**
+   * centerMap
+   *
+   * Centers the map showing all markers in view.
+   *
+   * @date    22/10/19
+   * @since   5.8.6
+   *
+   * @param   object The map instance.
+   * @return  void
+   */
+  function centerMap(map) {
+    // Create map boundaries from all map markers.
+    var bounds = new google.maps.LatLngBounds();
+    map.markers.forEach(function (marker) {
+      bounds.extend({
+        lat: marker.position.lat(),
+        lng: marker.position.lng()
+      });
+    });
+
+    // Case: Single marker.
+    if (map.markers.length == 1) {
+      map.setCenter(bounds.getCenter());
+
+      // Case: Multiple markers.
+    } else {
+      map.fitBounds(bounds);
+    }
+  }
+
+  // Render maps on page load.
+  $(document).ready(function () {
+    $(".acf-map").each(function () {
+      var map = initMap($(this));
+    });
+  });
+})(jQuery);
 
 /***/ }),
 
@@ -3948,6 +4086,7 @@ var heroSlider = new _modules_HeroSlider__WEBPACK_IMPORTED_MODULE_2__["default"]
   \***********************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
+"use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
@@ -3979,6 +4118,7 @@ class HeroSlider {
     }
   }
 }
+const slider = new HeroSlider();
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (HeroSlider);
 
 /***/ }),
@@ -3987,12 +4127,8 @@ class HeroSlider {
 /*!***********************************!*\
   !*** ./src/modules/MobileMenu.js ***!
   \***********************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+/***/ (() => {
 
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
 class MobileMenu {
   constructor() {
     this.menu = document.querySelector(".site-header__menu");
@@ -4008,7 +4144,79 @@ class MobileMenu {
     this.menu.classList.toggle("site-header__menu--active");
   }
 }
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (MobileMenu);
+const mobile = new MobileMenu();
+
+/***/ }),
+
+/***/ "./src/modules/Search.js":
+/*!*******************************!*\
+  !*** ./src/modules/Search.js ***!
+  \*******************************/
+/***/ (() => {
+
+class Search {
+  // 1. describe and create/initiate our object
+  constructor() {
+    this.openButtons = document.querySelectorAll(".js-search-trigger");
+    this.closeButton = document.querySelector(".search-overlay__close");
+    this.searchOverlay = document.querySelector(".search-overlay");
+    this.searchField = document.querySelector("#search-term");
+    this.resultsDiv = document.querySelector("#search-overlay__results");
+    this.isSpinnerVisible = false;
+    this.isOverlayOpen = false;
+    this.previousValue;
+    this.typingTimer;
+    this.events();
+  }
+
+  // 2. events
+  events() {
+    this.openButtons.forEach(button => button.addEventListener("click", this.openOverlay.bind(this)));
+    this.closeButton.addEventListener("click", this.closeOverlay.bind(this));
+    document.body.addEventListener("keydown", this.keyPressDispatcher.bind(this));
+    document.body.addEventListener("keyup", this.typingLogic.bind(this));
+  }
+  typingLogic() {
+    if (this.searchField.value != this.previousValue) {
+      clearTimeout(this.typingTimer);
+      if (this.searchField.innerHTML === "") {
+        if (!this.isSpinnerVisible) {
+          this.resultsDiv.innerHTML = `<div class="spinner-loader"></div>`;
+          this.isSpinnerVisible = true;
+        }
+        this.typingTimer = setTimeout(this.getResults.bind(this), 750);
+      } else {
+        this.resultsDiv.innerHTML = "";
+        this.isSpinnerVisible = false;
+      }
+      this.previousValue = this.searchField.value;
+    }
+  }
+  getResults() {
+    this.resultsDiv.innerHTML = "<h2>Here is your results</h2>";
+  }
+  keyPressDispatcher(e) {
+    {
+      if (e.key == "Shift" && !this.isOverlayOpen) {
+        this.openOverlay();
+      }
+      if (e.key == "Escape" && this.isOverlayOpen) {
+        this.closeOverlay();
+      }
+    }
+  }
+  openOverlay() {
+    this.searchOverlay.classList.add("search-overlay--active");
+    document.body.classList.add("body-no-scroll");
+    this.isOverlayOpen = true;
+  }
+  closeOverlay() {
+    this.searchOverlay.classList.remove("search-overlay--active");
+    document.body.classList.remove("body-no-scroll");
+    this.isOverlayOpen = false;
+  }
+}
+let search = new Search();
 
 /***/ })
 
@@ -4071,6 +4279,18 @@ class MobileMenu {
 /******/ 				}
 /******/ 			}
 /******/ 			return result;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__webpack_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__webpack_require__.d(getter, { a: getter });
+/******/ 			return getter;
 /******/ 		};
 /******/ 	})();
 /******/ 	

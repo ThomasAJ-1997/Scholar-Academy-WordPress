@@ -1,76 +1,118 @@
-class GMap {
-  constructor() {
-    document.querySelectorAll(".acf-map").forEach(el => {
-      this.new_map(el)
-    })
+(function ($) {
+  /**
+   * initMap
+   *
+   * Renders a Google Map onto the selected jQuery element
+   *
+   * @date    22/10/19
+   * @since   5.8.6
+   *
+   * @param   jQuery $el The jQuery element.
+   * @return  object The map instance.
+   */
+  function initMap($el) {
+    // Find marker elements within map.
+    var $markers = $el.find(".marker");
+
+    // Create gerenic map.
+    var mapArgs = {
+      zoom: $el.data("zoom") || 16,
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+    };
+    var map = new google.maps.Map($el[0], mapArgs);
+
+    // Add markers.
+    map.markers = [];
+    $markers.each(function () {
+      initMarker($(this), map);
+    });
+
+    // Center map based on markers.
+    centerMap(map);
+
+    // Return map instance.
+    return map;
   }
 
-  new_map($el) {
-    var $markers = $el.querySelectorAll(".marker")
+  /**
+   * initMarker
+   *
+   * Creates a marker for the given jQuery element and map.
+   *
+   * @date    22/10/19
+   * @since   5.8.6
+   *
+   * @param   jQuery $el The jQuery element.
+   * @param   object The map instance.
+   * @return  object The marker instance.
+   */
+  function initMarker($marker, map) {
+    // Get position from marker.
+    var lat = $marker.data("lat");
+    var lng = $marker.data("lng");
+    var latLng = {
+      lat: parseFloat(lat),
+      lng: parseFloat(lng),
+    };
 
-    var args = {
-      zoom: 16,
-      center: new google.maps.LatLng(0, 0),
-      mapTypeId: google.maps.MapTypeId.ROADMAP
-    }
-
-    var map = new google.maps.Map($el, args)
-    map.markers = []
-    var that = this
-
-    // add markers
-    $markers.forEach(function (x) {
-      that.add_marker(x, map)
-    })
-
-    // center map
-    this.center_map(map)
-  } // end new_map
-
-  add_marker($marker, map) {
-    var latlng = new google.maps.LatLng($marker.getAttribute("data-lat"), $marker.getAttribute("data-lng"))
-
+    // Create marker instance.
     var marker = new google.maps.Marker({
-      position: latlng,
-      map: map
-    })
+      position: latLng,
+      map: map,
+    });
 
-    map.markers.push(marker)
+    // Append to reference for later use.
+    map.markers.push(marker);
 
-    // if marker contains HTML, add it to an infoWindow
-    if ($marker.innerHTML) {
-      // create info window
+    // If marker contains HTML, add it to an infoWindow.
+    if ($marker.html()) {
+      // Create info window.
       var infowindow = new google.maps.InfoWindow({
-        content: $marker.innerHTML
-      })
+        content: $marker.html(),
+      });
 
-      // show info window when marker is clicked
+      // Show info window when marker is clicked.
       google.maps.event.addListener(marker, "click", function () {
-        infowindow.open(map, marker)
-      })
+        infowindow.open(map, marker);
+      });
     }
-  } // end add_marker
+  }
 
-  center_map(map) {
-    var bounds = new google.maps.LatLngBounds()
-
-    // loop through all markers and create bounds
+  /**
+   * centerMap
+   *
+   * Centers the map showing all markers in view.
+   *
+   * @date    22/10/19
+   * @since   5.8.6
+   *
+   * @param   object The map instance.
+   * @return  void
+   */
+  function centerMap(map) {
+    // Create map boundaries from all map markers.
+    var bounds = new google.maps.LatLngBounds();
     map.markers.forEach(function (marker) {
-      var latlng = new google.maps.LatLng(marker.position.lat(), marker.position.lng())
+      bounds.extend({
+        lat: marker.position.lat(),
+        lng: marker.position.lng(),
+      });
+    });
 
-      bounds.extend(latlng)
-    })
-
-    // only 1 marker?
+    // Case: Single marker.
     if (map.markers.length == 1) {
-      // set center of map
-      map.setCenter(bounds.getCenter())
-      map.setZoom(16)
-    } else {
-      // fit to bounds
-      map.fitBounds(bounds)
-    }
-  } // end center_map
-}
+      map.setCenter(bounds.getCenter());
 
-export default GMap
+      // Case: Multiple markers.
+    } else {
+      map.fitBounds(bounds);
+    }
+  }
+
+  // Render maps on page load.
+  $(document).ready(function () {
+    $(".acf-map").each(function () {
+      var map = initMap($(this));
+    });
+  });
+})(jQuery);

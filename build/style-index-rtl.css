@@ -1158,7 +1158,7 @@ body.admin-bar .search-overlay {
 }
 .search-overlay__icon {
   margin-left: 10px;
-  font-size: 1.8rem;
+  font-size: 4.8rem;
   color: #F95738;
 }
 @media (min-width: 960px) {
